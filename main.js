@@ -95,9 +95,30 @@ function releaseWakeLock() {
 }
 
 function startWorkout() {
-    const durationMin = parseFloat(document.getElementById('total-duration').value);
-    const freqMin = parseInt(document.getElementById('change-min').value) || 0;
-    const freqSec = parseInt(document.getElementById('change-sec').value) || 0;
+    const minSpeed = document.getElementById('min-speed').value;
+    const maxSpeed = document.getElementById('max-speed').value;
+    const speedStep = document.getElementById('speed-step').value;
+    const changeMin = document.getElementById('change-min').value;
+    const changeSec = document.getElementById('change-sec').value;
+    const totalDuration = document.getElementById('total-duration').value;
+    const optionSound = document.getElementById('option-sound').checked;
+    const optionWakeLock = document.getElementById('option-wake-lock').checked;
+
+    const settings = {
+        minSpeed,
+        maxSpeed,
+        speedStep,
+        changeMin,
+        changeSec,
+        totalDuration,
+        optionSound,
+        optionWakeLock
+    };
+    localStorage.setItem('treadmillSettings', JSON.stringify(settings));
+
+    const durationMin = parseFloat(totalDuration);
+    const freqMin = parseInt(changeMin) || 0;
+    const freqSec = parseInt(changeSec) || 0;
 
     totalSec = Math.floor(durationMin * 60);
     changeFreqSec = (freqMin * 60) + freqSec;
@@ -232,6 +253,24 @@ function showSummary() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Carica impostazioni salvate
+    const savedSettings = localStorage.getItem('treadmillSettings');
+    if (savedSettings) {
+        try {
+            const settings = JSON.parse(savedSettings);
+            if (settings.minSpeed) document.getElementById('min-speed').value = settings.minSpeed;
+            if (settings.maxSpeed) document.getElementById('max-speed').value = settings.maxSpeed;
+            if (settings.speedStep) document.getElementById('speed-step').value = settings.speedStep;
+            if (settings.changeMin) document.getElementById('change-min').value = settings.changeMin;
+            if (settings.changeSec) document.getElementById('change-sec').value = settings.changeSec;
+            if (settings.totalDuration) document.getElementById('total-duration').value = settings.totalDuration;
+            if (settings.hasOwnProperty('optionSound')) document.getElementById('option-sound').checked = settings.optionSound;
+            if (settings.hasOwnProperty('optionWakeLock')) document.getElementById('option-wake-lock').checked = settings.optionWakeLock;
+        } catch (e) {
+            console.error("Errore nel caricamento delle impostazioni", e);
+        }
+    }
+
     var toggle = document.getElementById('accordion-toggle');
     var content = document.getElementById('accordion-content');
     var icon = document.getElementById('accordion-icon');
