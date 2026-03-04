@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #0f172a;
+    color: #f8fafc;
+    overflow-x: hidden;
+}
+
+.glass-panel {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.speed-display {
+    font-size: clamp(5rem, 20vw, 12rem);
+    line-height: 1;
+    font-weight: 900;
+}
+
+.flash-active {
+    animation: flash-bg 0.5s ease-out;
+}
+
+@keyframes flash-bg {
+    0% { background-color: rgba(59, 130, 246, 0.5); }
+    100% { background-color: transparent; }
+}
+
+.timer-text {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Nascondi frecce input number */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.stepper-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    width: 3rem;
+    height: 3rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    background-color: rgb(51 65 85);
+    border-radius: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    transition: background-color 0.15s, color 0.15s;
+}
+.stepper-btn:active {
+    background-color: rgb(37 99 235);
+}
+
+/* Modale di conferma */
+#confirm-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.8);
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+/* Accordion Avanzate */
+.accordion-icon.is-open {
+    transform: rotate(180deg);
+}
+
+/* Toggle Switch Style (iPhone style) */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #334155;
+    transition: .3s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .toggle-slider {
+    background-color: #3b82f6;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}

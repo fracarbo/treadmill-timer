@@ -4,84 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Treadmill Dynamic Timer</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
-            overflow-x: hidden;
-        }
-
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .speed-display {
-            font-size: clamp(5rem, 20vw, 12rem);
-            line-height: 1;
-            font-weight: 900;
-        }
-
-        .flash-active {
-            animation: flash-bg 0.5s ease-out;
-        }
-
-        @keyframes flash-bg {
-            0% { background-color: rgba(59, 130, 246, 0.5); }
-            100% { background-color: transparent; }
-        }
-
-        .timer-text {
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* Nascondi frecce input number */
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-
-        .stepper-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 2rem;
-            width: 3rem;
-            height: 3rem;
-            padding-left: 1rem;
-            padding-right: 1rem;
-            background-color: rgb(51 65 85);
-            border-radius: 0.75rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-            transition: background-color 0.15s, color 0.15s;
-        }
-        .stepper-btn:active {
-            background-color: rgb(37 99 235);
-        }
-
-        /* Stile per il modale di conferma */
-        #confirm-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 50;
-            background: rgba(0, 0, 0, 0.8);
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-    </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
@@ -176,6 +101,32 @@
                 </div>
             </div>
 
+            <!-- Accordion Avanzate -->
+            <div class="accordion border-t border-slate-700/50 pt-4 mt-2">
+                <button type="button" id="accordion-toggle" class="accordion-trigger w-full flex items-center justify-between py-3 text-left text-slate-400 hover:text-white transition-colors">
+                    <span class="text-sm font-bold uppercase tracking-wider">Avanzate</span>
+                    <span id="accordion-icon" class="accordion-icon text-slate-500 transition-transform duration-200">▼</span>
+                </button>
+                <div id="accordion-content" class="accordion-content hidden overflow-hidden">
+                    <div class="space-y-4 pt-4 pb-2">
+                        <label class="flex items-center justify-between cursor-pointer select-none text-slate-300 group">
+                            <span class="text-sm font-medium group-hover:text-white transition-colors">Suona ad ogni nuova velocità</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="option-sound" checked>
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </label>
+                        <label class="flex items-center justify-between cursor-pointer select-none text-slate-300 group">
+                            <span class="text-sm font-medium group-hover:text-white transition-colors">Schermo sempre attivo</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="option-wake-lock">
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
             <button onclick="startWorkout()" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-black py-5 rounded-2xl transition-all shadow-xl shadow-blue-900/40 text-xl uppercase tracking-widest mt-2">
                 Avvia Allenamento
             </button>
@@ -246,219 +197,6 @@
         </button>
     </div>
 
-    <script>
-        let timer = null;
-        let changeTimer = 0;
-        let elapsed = 0;
-        let totalSec = 0;
-        let changeFreqSec = 0;
-        let isPaused = false;
-        let workoutData = [];
-        let currentSpeed = 0;
-        let lastSpeed = 0;
-        let workoutActive = false;
-
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        function step(id, amount) {
-            const input = document.getElementById(id);
-            let val = parseFloat(input.value) || 0;
-            val = +(val + amount).toFixed(2);
-            if (val < 0) val = 0;
-            input.value = val;
-            input.dispatchEvent(new Event('change'));
-        }
-
-        function stepSpeed(id, direction) {
-            const amount = parseFloat(document.getElementById('speed-step').value) || 0.5;
-            step(id, direction * amount);
-        }
-
-        function playBeep() {
-            try {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.2);
-            } catch (e) { console.error("Audio error", e); }
-        }
-
-        function formatTime(seconds) {
-            const m = Math.floor(seconds / 60);
-            const s = seconds % 60;
-            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-        }
-
-        function generateNewSpeed() {
-            const min = parseFloat(document.getElementById('min-speed').value);
-            const max = parseFloat(document.getElementById('max-speed').value);
-            const step = parseFloat(document.getElementById('speed-step').value);
-            
-            const options = [];
-            for (let s = min; s <= max; s = +(s + step).toFixed(2)) {
-                options.push(s);
-            }
-
-            let nextSpeed;
-            if (options.length === 0) return min;
-
-            do {
-                nextSpeed = options[Math.floor(Math.random() * options.length)];
-            } while (options.length > 1 && nextSpeed === lastSpeed);
-
-            lastSpeed = nextSpeed;
-            return nextSpeed;
-        }
-
-        function triggerFlash() {
-            const container = document.getElementById('speed-container');
-            container.classList.add('flash-active');
-            setTimeout(() => container.classList.remove('flash-active'), 500);
-            
-            if ('vibrate' in navigator) navigator.vibrate(200);
-            playBeep();
-        }
-
-        function startWorkout() {
-            const durationMin = parseFloat(document.getElementById('total-duration').value);
-            const freqMin = parseInt(document.getElementById('change-min').value) || 0;
-            const freqSec = parseInt(document.getElementById('change-sec').value) || 0;
-            
-            totalSec = Math.floor(durationMin * 60);
-            changeFreqSec = (freqMin * 60) + freqSec;
-            
-            if (totalSec <= 0 || changeFreqSec <= 0) {
-                alert("Inserisci valori validi.");
-                return;
-            }
-
-            document.getElementById('setup-screen').classList.add('hidden');
-            document.getElementById('workout-screen').classList.remove('hidden');
-
-            elapsed = 0;
-            changeTimer = 0;
-            workoutData = [];
-            isPaused = false;
-            workoutActive = true;
-            
-            updateSpeed();
-            
-            if(timer) clearInterval(timer);
-            timer = setInterval(() => {
-                if (isPaused) return;
-
-                elapsed++;
-                changeTimer++;
-
-                document.getElementById('time-elapsed').textContent = formatTime(elapsed);
-                document.getElementById('time-remaining').textContent = formatTime(Math.max(0, totalSec - elapsed));
-
-                if (changeTimer >= changeFreqSec) {
-                    updateSpeed();
-                    changeTimer = 0;
-                }
-
-                if (elapsed >= totalSec) {
-                    executeStop();
-                }
-            }, 1000);
-        }
-
-        function updateSpeed() {
-            currentSpeed = generateNewSpeed();
-            document.getElementById('current-speed').textContent = currentSpeed.toFixed(1);
-            workoutData.push({ time: elapsed, speed: currentSpeed });
-            triggerFlash();
-        }
-
-        function togglePause() {
-            isPaused = !isPaused;
-            const btn = document.getElementById('pause-btn');
-            btn.textContent = isPaused ? 'Riprendi' : 'Pausa';
-            btn.classList.toggle('bg-blue-600', isPaused);
-            btn.classList.toggle('bg-slate-700', !isPaused);
-        }
-
-        // Funzioni per il modale di stop
-        function openStopModal() {
-            isPaused = true; // Mettiamo in pausa mentre si decide
-            document.getElementById('confirm-modal').style.display = 'flex';
-        }
-
-        function closeStopModal() {
-            document.getElementById('confirm-modal').style.display = 'none';
-            // Se non era già in pausa prima di aprire il modale, riprendiamo
-            const pauseBtn = document.getElementById('pause-btn');
-            if (pauseBtn.textContent === 'Pausa') {
-                isPaused = false;
-            }
-        }
-
-        function executeStop() {
-            workoutActive = false;
-            if(timer) clearInterval(timer);
-            document.getElementById('confirm-modal').style.display = 'none';
-            document.getElementById('workout-screen').classList.add('hidden');
-            document.getElementById('summary-screen').classList.remove('hidden');
-            showSummary();
-        }
-
-        function showSummary() {
-            if (workoutData.length === 0) return;
-
-            const speeds = workoutData.map(d => d.speed);
-            const avg = speeds.reduce((a, b) => a + b, 0) / speeds.length;
-            const max = Math.max(...speeds);
-            const min = Math.min(...speeds);
-
-            document.getElementById('sum-duration').textContent = formatTime(elapsed);
-            document.getElementById('sum-changes').textContent = workoutData.length;
-            document.getElementById('sum-avg').textContent = avg.toFixed(1) + ' km/h';
-            document.getElementById('sum-range').textContent = `${min} / ${max}`;
-
-            const ctx = document.getElementById('workoutChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: workoutData.map(d => formatTime(d.time)),
-                    datasets: [{
-                        label: 'Velocità (km/h)',
-                        data: workoutData.map(d => d.speed),
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        fill: true,
-                        stepped: true,
-                        tension: 0,
-                        pointRadius: 3,
-                        pointBackgroundColor: '#3b82f6'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            ticks: { color: '#94a3b8' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#94a3b8', maxRotation: 0 }
-                        }
-                    }
-                }
-            });
-        }
-    </script>
+    <script src="main.js"></script>
 </body>
 </html>
