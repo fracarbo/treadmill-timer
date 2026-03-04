@@ -41,6 +41,35 @@
             font-variant-numeric: tabular-nums;
         }
 
+        /* Nascondi frecce input number */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .stepper-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 4rem;
+            width: 3rem;
+            height: 3rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            background-color: rgb(51 65 85);
+            border-radius: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            transition: background-color 0.15s, color 0.15s;
+        }
+        .stepper-btn:active {
+            background-color: rgb(37 99 235);
+        }
+
         /* Stile per il modale di conferma */
         #confirm-modal {
             display: none;
@@ -58,110 +87,161 @@
 
     <!-- Modale di Conferma Stop Personalizzato -->
     <div id="confirm-modal">
-        <div class="glass-panel p-8 rounded-3xl max-w-sm w-full text-center space-y-6 border-2 border-red-500/30">
-            <h2 class="text-2xl font-bold">Terminare l'allenamento?</h2>
-            <p class="text-slate-400">Vuoi fermarti ora e vedere il riepilogo finale?</p>
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="closeStopModal()" class="bg-slate-700 hover:bg-slate-600 py-3 rounded-xl font-bold">ANNULLA</button>
-                <button onclick="executeStop()" class="bg-red-600 hover:bg-red-500 py-3 rounded-xl font-bold text-white shadow-lg shadow-red-900/40">SÌ, STOP</button>
+        <div class="glass-panel p-8 rounded-[2.5rem] max-w-sm w-full text-center space-y-8 border-2 border-red-500/20 shadow-2xl shadow-black">
+            <div class="space-y-2">
+                <h2 class="text-3xl font-black uppercase tracking-tight text-white">Terminare?</h2>
+                <p class="text-slate-400 font-medium">Vuoi fermarti ora e vedere il riepilogo finale?</p>
+            </div>
+            <div class="grid grid-cols-1 gap-4">
+                <button onclick="executeStop()" class="bg-red-600 hover:bg-red-500 active:scale-95 py-5 rounded-2xl font-black text-white shadow-xl shadow-red-900/40 uppercase tracking-widest">SÌ, STOP</button>
+                <button onclick="closeStopModal()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 py-5 rounded-2xl font-black text-slate-400 uppercase tracking-widest">ANNULLA</button>
             </div>
         </div>
     </div>
 
     <!-- Configurazione Iniziale -->
     <div id="setup-screen" class="w-full max-w-md space-y-6">
-        <h1 class="text-3xl font-bold text-center text-blue-400 mb-8">Allenamento Tapis Roulant</h1>
+        <img src="assets/images/logo.png" alt="Paceflow Dynamic Treadmill Timer" class="w-full max-w-sm mx-auto mb-0 h-auto block">
         
-        <div class="glass-panel p-6 rounded-3xl space-y-4">
-            <div>
-                <label class="block text-sm font-medium mb-1 text-slate-400">Velocità (km/h)</label>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="min-speed" step="0.1" value="4" class="bg-slate-800 border-none rounded-xl p-3 focus:ring-2 focus:ring-blue-500">
-                    <input type="number" id="max-speed" step="0.1" value="8" class="bg-slate-800 border-none rounded-xl p-3 focus:ring-2 focus:ring-blue-500">
+        <div class="glass-panel p-6 rounded-3xl space-y-8">
+            <!-- GRUPPO VELOCITÀ -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 pb-1 border-b border-blue-500/20">
+                    <span class="text-blue-400 text-lg">⚡</span>
+                    <h2 class="text-sm font-black uppercase tracking-[0.2em] text-blue-400">Velocità</h2>
+                </div>
+                
+                <div class="space-y-3">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 ml-1">Range (km/h)</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <span class="text-[9px] text-slate-600 uppercase ml-1">Min</span>
+                            <div class="flex items-center bg-slate-800/50 rounded-2xl p-1 border border-slate-700/50">
+                                <button onclick="step('min-speed', -0.1)" class="stepper-btn">−</button>
+                                <input type="number" id="min-speed" step="0.1" value="2" class="w-full bg-transparent border-none text-center text-xl font-bold focus:ring-0 p-2">
+                                <button onclick="step('min-speed', 0.1)" class="stepper-btn">+</button>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[9px] text-slate-600 uppercase ml-1">Max</span>
+                            <div class="flex items-center bg-slate-800/50 rounded-2xl p-1 border border-slate-700/50">
+                                <button onclick="step('max-speed', -0.1)" class="stepper-btn">−</button>
+                                <input type="number" id="max-speed" step="0.1" value="12" class="w-full bg-transparent border-none text-center text-xl font-bold focus:ring-0 p-2">
+                                <button onclick="step('max-speed', 0.1)" class="stepper-btn">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 ml-1">Step Incremento (km/h)</label>
+                    <div class="flex items-center bg-slate-800/50 rounded-2xl p-1 border border-slate-700/50">
+                        <button onclick="step('speed-step', -0.1)" class="stepper-btn">−</button>
+                        <input type="number" id="speed-step" step="0.1" value="0.5" class="w-full bg-transparent border-none text-center text-xl font-bold focus:ring-0 p-2">
+                        <button onclick="step('speed-step', 0.1)" class="stepper-btn">+</button>
+                    </div>
                 </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium mb-1 text-slate-400">Step Incremento</label>
-                <input type="number" id="speed-step" step="0.1" value="0.5" class="w-full bg-slate-800 border-none rounded-xl p-3">
-            </div>
+            <!-- GRUPPO TEMPO -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 pb-1 border-b border-emerald-500/20">
+                    <span class="text-emerald-400 text-lg">⏱️</span>
+                    <h2 class="text-sm font-black uppercase tracking-[0.2em] text-emerald-400">Tempo</h2>
+                </div>
 
-            <div>
-                <label class="block text-sm font-medium mb-1 text-slate-400">Frequenza Cambio (min:sec)</label>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="change-min" value="1" class="bg-slate-800 border-none rounded-xl p-3">
-                    <input type="number" id="change-sec" value="30" class="bg-slate-800 border-none rounded-xl p-3">
+                <div class="space-y-3">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 ml-1">Frequenza Cambio (min:sec)</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex items-center bg-slate-800/50 rounded-2xl p-1 border border-slate-700/50">
+                            <button onclick="step('change-min', -1)" class="stepper-btn">−</button>
+                            <input type="number" id="change-min" value="1" class="w-full bg-transparent border-none text-center text-xl font-bold focus:ring-0 p-2">
+                            <button onclick="step('change-min', 1)" class="stepper-btn">+</button>
+                        </div>
+                        <div class="flex items-center bg-slate-800/50 rounded-2xl p-1 border border-slate-700/50">
+                            <button onclick="step('change-sec', -5)" class="stepper-btn">−</button>
+                            <input type="number" id="change-sec" value="0" class="w-full bg-transparent border-none text-center text-xl font-bold focus:ring-0 p-2">
+                            <button onclick="step('change-sec', 5)" class="stepper-btn">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 ml-1">Durata Totale (min)</label>
+                    <div class="flex items-center bg-slate-800/50 rounded-2xl p-1 border border-slate-700/50">
+                        <button onclick="step('total-duration', -1)" class="stepper-btn">−</button>
+                        <input type="number" id="total-duration" value="30" class="w-full bg-transparent border-none text-center text-xl font-bold focus:ring-0 p-2">
+                        <button onclick="step('total-duration', 1)" class="stepper-btn">+</button>
+                    </div>
                 </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium mb-1 text-slate-400">Durata Totale (min)</label>
-                <input type="number" id="total-duration" value="15" class="w-full bg-slate-800 border-none rounded-xl p-3">
-            </div>
-
-            <button onclick="startWorkout()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-900/20 text-xl">
-                AVVIA ALLENAMENTO
+            <button onclick="startWorkout()" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-black py-5 rounded-2xl transition-all shadow-xl shadow-blue-900/40 text-xl uppercase tracking-widest mt-2">
+                Avvia Allenamento
             </button>
         </div>
     </div>
 
     <!-- Schermo Allenamento Attivo -->
     <div id="workout-screen" class="hidden w-full max-w-4xl h-full flex flex-col items-center justify-between space-y-8">
-        <div class="w-full flex justify-between items-center px-4">
+        <div class="w-full flex justify-between items-center px-6 pt-4">
             <div class="text-left">
-                <p class="text-slate-400 text-xs uppercase tracking-widest">Rimanente</p>
-                <p id="time-remaining" class="timer-text text-2xl md:text-3xl font-bold text-blue-400">00:00</p>
+                <p class="text-slate-500 text-[10px] uppercase font-black tracking-[0.2em]">Rimanente</p>
+                <p id="time-remaining" class="timer-text text-3xl md:text-4xl font-black text-blue-500">00:00</p>
             </div>
             <div class="text-right">
-                <p class="text-slate-400 text-xs uppercase tracking-widest">Trascorso</p>
-                <p id="time-elapsed" class="timer-text text-2xl md:text-3xl font-bold">00:00</p>
+                <p class="text-slate-500 text-[10px] uppercase font-black tracking-[0.2em]">Trascorso</p>
+                <p id="time-elapsed" class="timer-text text-3xl md:text-4xl font-black text-slate-300">00:00</p>
             </div>
         </div>
 
-        <div id="speed-container" class="flex flex-col items-center justify-center py-12 rounded-full w-full max-w-[320px] md:max-w-md aspect-square glass-panel transition-all duration-300 shadow-2xl shadow-blue-900/10">
-            <p class="text-blue-400 text-base md:text-xl font-bold tracking-widest uppercase">Velocità</p>
-            <div id="current-speed" class="speed-display">--</div>
-            <p class="text-slate-400 text-xl md:text-2xl font-medium mt-[-5px]">km/h</p>
+        <div id="speed-container" class="flex flex-col items-center justify-center py-12 rounded-full w-full max-w-[320px] md:max-w-md aspect-square glass-panel transition-all duration-300 shadow-[0_0_50px_rgba(59,130,246,0.15)] border-4 border-blue-500/20">
+            <p class="text-blue-500 text-lg md:text-2xl font-black tracking-[0.3em] uppercase mb-[-10px]">Velocità</p>
+            <div id="current-speed" class="speed-display text-white drop-shadow-[0_0_20px_rgba(59,130,246,0.3)]">--</div>
+            <p class="text-slate-500 text-2xl md:text-3xl font-bold mt-[-10px]">km/h</p>
         </div>
 
-        <div class="w-full max-w-md grid grid-cols-2 gap-4 pb-8 px-4">
-            <button id="pause-btn" onclick="togglePause()" class="bg-slate-700 hover:bg-slate-600 py-6 rounded-3xl text-xl font-bold transition-all uppercase">
+        <div class="w-full max-w-md grid grid-cols-2 gap-6 pb-12 px-6">
+            <button id="pause-btn" onclick="togglePause()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 py-6 rounded-[2rem] text-xl font-black transition-all uppercase tracking-widest border border-slate-700 shadow-xl">
                 Pausa
             </button>
-            <button onclick="openStopModal()" class="bg-red-600/20 text-red-500 border-2 border-red-500/30 hover:bg-red-600 hover:text-white py-6 rounded-3xl text-xl font-bold transition-all uppercase">
+            <button onclick="openStopModal()" class="bg-red-950/30 text-red-500 border-2 border-red-500/30 hover:bg-red-600 hover:text-white active:scale-95 py-6 rounded-[2rem] text-xl font-black transition-all uppercase tracking-widest shadow-xl shadow-red-950/20">
                 Stop
             </button>
         </div>
     </div>
 
     <!-- Riepilogo Finale -->
-    <div id="summary-screen" class="hidden w-full max-w-2xl space-y-6">
-        <h1 class="text-3xl font-bold text-center text-green-400">Risultati Sessione</h1>
+    <div id="summary-screen" class="hidden w-full max-w-2xl space-y-8">
+        <div class="text-center space-y-2">
+            <h1 class="text-4xl font-black text-white uppercase tracking-tighter">Sessione Conclusa</h1>
+            <p class="text-green-500 font-bold uppercase tracking-widest text-sm">Ottimo lavoro!</p>
+        </div>
         
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="glass-panel p-4 rounded-2xl text-center">
-                <p class="text-slate-400 text-xs uppercase">Tempo</p>
-                <p id="sum-duration" class="text-xl font-bold">--</p>
+            <div class="glass-panel p-6 rounded-[2rem] text-center border-b-4 border-blue-500/30 shadow-xl">
+                <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Tempo</p>
+                <p id="sum-duration" class="text-2xl font-black text-white">--</p>
             </div>
-            <div class="glass-panel p-4 rounded-2xl text-center">
-                <p class="text-slate-400 text-xs uppercase">Cambi</p>
-                <p id="sum-changes" class="text-xl font-bold">--</p>
+            <div class="glass-panel p-6 rounded-[2rem] text-center border-b-4 border-purple-500/30 shadow-xl">
+                <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Cambi</p>
+                <p id="sum-changes" class="text-2xl font-black text-white">--</p>
             </div>
-            <div class="glass-panel p-4 rounded-2xl text-center">
-                <p class="text-slate-400 text-xs uppercase">Media</p>
-                <p id="sum-avg" class="text-xl font-bold">--</p>
+            <div class="glass-panel p-6 rounded-[2rem] text-center border-b-4 border-orange-500/30 shadow-xl">
+                <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Media</p>
+                <p id="sum-avg" class="text-2xl font-black text-white">--</p>
             </div>
-            <div class="glass-panel p-4 rounded-2xl text-center">
-                <p class="text-slate-400 text-xs uppercase">Min/Max</p>
-                <p id="sum-range" class="text-xl font-bold">--</p>
+            <div class="glass-panel p-6 rounded-[2rem] text-center border-b-4 border-red-500/30 shadow-xl">
+                <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Min/Max</p>
+                <p id="sum-range" class="text-2xl font-black text-white">--</p>
             </div>
         </div>
 
-        <div class="glass-panel p-4 rounded-3xl h-[300px]">
+        <div class="glass-panel p-6 rounded-[2.5rem] h-[350px] shadow-2xl border border-white/5">
             <canvas id="workoutChart"></canvas>
         </div>
 
-        <button onclick="location.reload()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg text-xl">
+        <button onclick="location.reload()" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-black py-6 rounded-2xl transition-all shadow-2xl shadow-blue-900/40 text-xl uppercase tracking-[0.2em]">
             NUOVA SESSIONE
         </button>
     </div>
@@ -179,6 +259,16 @@
         let workoutActive = false;
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function step(id, amount) {
+            const input = document.getElementById(id);
+            let val = parseFloat(input.value) || 0;
+            val = +(val + amount).toFixed(2);
+            if (val < 0) val = 0;
+            input.value = val;
+            // Trigger change event if needed
+            input.dispatchEvent(new Event('change'));
+        }
 
         function playBeep() {
             try {
