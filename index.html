@@ -117,17 +117,17 @@
                         <div class="space-y-1">
                             <span class="text-[9px] text-slate-600 uppercase ml-1">Min</span>
                             <div class="flex items-center bg-slate-800/50 rounded-2xl p-1 border border-slate-700/50">
-                                <button onclick="step('min-speed', -0.1)" class="stepper-btn">−</button>
+                                <button onclick="stepSpeed('min-speed', -1)" class="stepper-btn">−</button>
                                 <input type="number" id="min-speed" step="0.1" value="2" class="w-full bg-transparent border-none text-center text-xl font-bold focus:ring-0 p-2">
-                                <button onclick="step('min-speed', 0.1)" class="stepper-btn">+</button>
+                                <button onclick="stepSpeed('min-speed', 1)" class="stepper-btn">+</button>
                             </div>
                         </div>
                         <div class="space-y-1">
                             <span class="text-[9px] text-slate-600 uppercase ml-1">Max</span>
                             <div class="flex items-center bg-slate-800/50 rounded-2xl p-1 border border-slate-700/50">
-                                <button onclick="step('max-speed', -0.1)" class="stepper-btn">−</button>
+                                <button onclick="stepSpeed('max-speed', -1)" class="stepper-btn">−</button>
                                 <input type="number" id="max-speed" step="0.1" value="12" class="w-full bg-transparent border-none text-center text-xl font-bold focus:ring-0 p-2">
-                                <button onclick="step('max-speed', 0.1)" class="stepper-btn">+</button>
+                                <button onclick="stepSpeed('max-speed', 1)" class="stepper-btn">+</button>
                             </div>
                         </div>
                     </div>
@@ -266,8 +266,12 @@
             val = +(val + amount).toFixed(2);
             if (val < 0) val = 0;
             input.value = val;
-            // Trigger change event if needed
             input.dispatchEvent(new Event('change'));
+        }
+
+        function stepSpeed(id, direction) {
+            const amount = parseFloat(document.getElementById('speed-step').value) || 0.5;
+            step(id, direction * amount);
         }
 
         function playBeep() {
