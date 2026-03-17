@@ -124,3 +124,22 @@ input:checked + .toggle-slider {
 input:checked + .toggle-slider:before {
     transform: translateX(20px);
 }
+
+/* Preset buttons */
+.preset-btn {
+    background-color: rgba(51, 65, 85, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+}
+.preset-btn:hover {
+    background-color: rgba(71, 85, 105, 0.7);
+    color: #e2e8f0;
+}
+.preset-btn:active {
+    transform: scale(0.95);
+}
+.preset-btn.preset-active {
+    background-color: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+    color: #93c5fd;
+}

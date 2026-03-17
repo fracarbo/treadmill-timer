@@ -1,3 +1,18 @@
+const PRESETS = {
+    easy: {
+        minSpeed: 4, maxSpeed: 7, speedStep: 0.5,
+        changeMin: 2, changeSec: 0, totalDuration: 20
+    },
+    medium: {
+        minSpeed: 5, maxSpeed: 10, speedStep: 0.5,
+        changeMin: 1, changeSec: 30, totalDuration: 30
+    },
+    hard: {
+        minSpeed: 8, maxSpeed: 14, speedStep: 1,
+        changeMin: 1, changeSec: 0, totalDuration: 40
+    }
+};
+
 let timer = null;
 let changeTimer = 0;
 let elapsed = 0;
@@ -11,6 +26,33 @@ let workoutActive = false;
 let wakeLockSentinel = null;
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function applyPreset(name) {
+    // Update active button state
+    ['custom', 'easy', 'medium', 'hard'].forEach(function (p) {
+        var btn = document.getElementById('preset-' + p);
+        if (btn) btn.classList.toggle('preset-active', p === name);
+    });
+
+    if (name === 'custom') return;
+
+    var preset = PRESETS[name];
+    if (!preset) return;
+
+    document.getElementById('min-speed').value = preset.minSpeed;
+    document.getElementById('max-speed').value = preset.maxSpeed;
+    document.getElementById('speed-step').value = preset.speedStep;
+    document.getElementById('change-min').value = preset.changeMin;
+    document.getElementById('change-sec').value = preset.changeSec;
+    document.getElementById('total-duration').value = preset.totalDuration;
+}
+
+function setPresetCustomOnChange() {
+    ['min-speed', 'max-speed', 'speed-step', 'change-min', 'change-sec', 'total-duration'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.addEventListener('change', function () { applyPreset('custom'); });
+    });
+}
 
 function step(id, amount) {
     const input = document.getElementById(id);
@@ -270,6 +312,8 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error("Errore nel caricamento delle impostazioni", e);
         }
     }
+
+    setPresetCustomOnChange();
 
     var toggle = document.getElementById('accordion-toggle');
     var content = document.getElementById('accordion-content');
